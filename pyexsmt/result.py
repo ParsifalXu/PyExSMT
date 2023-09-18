@@ -27,13 +27,15 @@ class Result(object):
             ret = ret.get_concr_value()
         self.execution_return_values.append(ret)
 
-    def to_dot(self, filename):
+    def to_dot(self, filename, mapping):
         header = "digraph {\n"
         footer = "}\n"
         if self.list_rep is None:
             self.list_rep = self._to_list_rep(self.path.root_constraint)
         dot = self._to_dot(self.list_rep)
         dot = header + dot + footer
+        for key, value in mapping.items():
+            dot = dot.replace(str(value), f"'{key}'")
         s = Source(dot, filename=filename+".dot", format="png")
         s.view()
 
@@ -90,6 +92,7 @@ class Result(object):
             if node.children[0].predicate.symtype.symbolic_eq(node.children[1].predicate.symtype):
                 left = node.children[0] if node.children[0].predicate.result else node.children[1]
                 right = node.children[1] if not node.children[1].predicate.result else node.children[0]
+                # print(f"see: {[pred_to_smt(left.predicate), self._to_list_rep(left), self._to_list_rep(right)]}")
                 return [pred_to_smt(left.predicate), self._to_list_rep(left), self._to_list_rep(right)]
             else:
                 raise ValueError("Two children of a constraint should have the same predicate!")
