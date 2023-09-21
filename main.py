@@ -136,7 +136,7 @@ def replace_str2num(file):
     # Replace each string with a random number and store the mapping
     for string in strings:
         random_number = random.randint(10000, 99999)
-        print(f"see values: {mapping.values()}")
+        # print(f"see values: {mapping.values()}")
         if random_number in mapping.values():
             random_number = random.randint(10000, 99999)
         mapping[string] = random_number
