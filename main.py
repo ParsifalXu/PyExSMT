@@ -32,6 +32,8 @@ def main():
                                     help="Generate a DOT graph of execution tree")
     parser.add_argument("--summary", dest="summary", action="store_true", \
                                     help="Generate a functional summary")
+    parser.add_argument("--path", dest="path", action="store_true", \
+                                    help="catch all paths from DOT graph of execution tree")
     parser.add_argument("--max-iters", dest="max_iters", type=int, \
                                     help="Limit number of iterations", default=0)
     parser.add_argument("--max-depth", dest="max_depth", type=int, \
@@ -84,7 +86,6 @@ def main():
     try:
         engine = ExplorationEngine(app.create_invocation(), solver=solver)
         result_struct = engine.explore(options.max_iters, options.max_depth, funcs)
-        print(f"see res: {result_struct}")
 
         return_vals = result_struct.execution_return_values
 
@@ -104,6 +105,10 @@ def main():
         # output DOT graph
         if options.dot_graph:
             result_struct.to_dot(filename, mapping)
+        
+        # output all path
+        if options.path:
+            result_struct.to_path(filename, mapping)
 
         replace_num2str(options.file, mapping)
 
@@ -122,8 +127,8 @@ def main():
 
 
 def replace_str2num(file):
-    with open('demo.py', 'r') as file:
-        content = file.read()
+    with open(file, 'r') as f:
+        content = f.read()
 
     # Find all the strings wrapped in single quotes
     strings = re.findall(r"'(.*?)'", content)
@@ -146,20 +151,20 @@ def replace_str2num(file):
     # exit(0)
 
     # Write the modified content back to the file
-    with open('demo.py', 'w') as file:
-        file.write(content)
+    with open(file, 'w') as f:
+        f.write(content)
 
     return mapping
 
 def replace_num2str(file, mapping):
-    with open('demo.py', 'r') as file:
-        content = file.read()
+    with open(file, 'r') as f:
+        content = f.read()
     
     for key, value in mapping.items():
         content = content.replace(str(value), f"'{key}'")
     
-    with open('demo.py', 'w') as file:
-        file.write(content)
+    with open(file, 'w') as f:
+        f.write(content)
 
 if __name__ == "__main__":
     main()
