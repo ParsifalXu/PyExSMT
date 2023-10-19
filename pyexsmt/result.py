@@ -221,16 +221,18 @@ def path_finder(root):
 
 def rep2Tree(rep):    
     if isinstance(rep, list):
-        root = Node(rep[0])        
-        if isinstance(rep[1], bool) or isinstance(rep[1], SymbolicObject):
-            root.left = Node(rep[1])
-        else:
-            root.left = rep2Tree(rep[1])
+        root = Node(rep[0])      
+        if rep[1] is not None:
+            if isinstance(rep[1], bool) or isinstance(rep[1], SymbolicObject):
+                root.left = Node(rep[1])
+            else:
+                root.left = rep2Tree(rep[1])
         
-        if isinstance(rep[2], bool) or isinstance(rep[2], SymbolicObject):
-            root.right = Node(rep[2])
-        else:
-            root.right = rep2Tree(rep[2])
+        if rep[2] is not None:
+            if isinstance(rep[2], bool) or isinstance(rep[2], SymbolicObject):
+                root.right = Node(rep[2])
+            else:
+                root.right = rep2Tree(rep[2])
         return root
     else:
         return Node(rep)
