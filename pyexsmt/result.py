@@ -33,11 +33,19 @@ class Result(object):
         if self.list_rep is None:
             self.list_rep = self._to_list_rep(self.path.root_constraint)
         print(f"see list rep: {self.list_rep}")
+        # print(f"see list rep type: {type(self.list_rep[1])}")
+        # print(f"check list rep type: {isinstance(self.list_rep[1], list)}")
+        tree = rep2Tree(self.list_rep)
+        print(tree)
+        path_finder(tree)
+
+
+
+
         dot = self._to_dot(self.list_rep)
         dot = header + dot + footer
         for key, value in mapping.items():
             dot = dot.replace(str(value), f"'{key}'")
-        print(dot)
         
         s = Source(dot, filename=filename+".dot", format="png")
         s.view()
@@ -183,3 +191,46 @@ class Result(object):
             return node.effect
 
         raise ValueError("Should not be possible! Can't have more than two children.")
+
+
+
+class Node():
+    def __init__(self, data):
+        self.left = None
+        self.data = data
+        self.right = None
+
+def path_finder_util(root, string, paths):
+    if not root: return
+    string += str(root.data)
+    path_finder_util(root.left, string+'->', paths)
+    path_finder_util(root.right, string+'->', paths)
+    if not root.left and not root.right:
+        paths.append(string)
+ 
+def path_finder(root):
+    if not root:
+        print("")
+        return
+    paths = []
+    path_finder_util(root, '', paths)
+    depaths = list(set(paths))
+    for path in depaths:
+        print(path)
+
+
+def rep2Tree(rep):    
+    if isinstance(rep, list):
+        root = Node(rep[0])        
+        if isinstance(rep[1], bool) or isinstance(rep[1], SymbolicObject):
+            root.left = Node(rep[1])
+        else:
+            root.left = rep2Tree(rep[1])
+        
+        if isinstance(rep[2], bool) or isinstance(rep[2], SymbolicObject):
+            root.right = Node(rep[2])
+        else:
+            root.right = rep2Tree(rep[2])
+        return root
+    else:
+        return Node(rep)
