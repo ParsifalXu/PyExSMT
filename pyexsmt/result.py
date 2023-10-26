@@ -37,8 +37,14 @@ class Result(object):
         # print(f"check list rep type: {isinstance(self.list_rep[1], list)}")
         tree = rep2Tree(self.list_rep)
         print(tree)
-        path_finder(tree)
-
+        origin_paths = path_finder(tree)
+        paths = []
+        for path in origin_paths:
+            for key, value in mapping.items():
+                path = path.replace(str(value), f"'{key}'")
+            paths.append(path)
+        for path in paths:
+            print(path)
 
 
 
@@ -215,8 +221,10 @@ def path_finder(root):
     paths = []
     path_finder_util(root, '', paths)
     depaths = list(set(paths))
-    for path in depaths:
-        print(path)
+    # for path in depaths:
+    #     print(path)
+
+    return depaths
 
 
 def rep2Tree(rep):    
