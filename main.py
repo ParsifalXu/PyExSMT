@@ -83,7 +83,7 @@ def main():
             result_struct.to_dot(filename)
 
         if options.path:
-            result_struct.to_dot(filename)
+            result_struct.to_path(filename)
 
         replace_num2str(options.file, mapping)
 
