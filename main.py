@@ -1,6 +1,7 @@
 import os
 import sys
 import logging
+import random
 from argparse import ArgumentParser
 
 from pyexsmt import uninterp_func_pair
@@ -55,6 +56,9 @@ def main():
     if options.file == "" or not os.path.exists(options.file):
         parser.error("Missing app to execute")
         sys.exit(1)
+    
+    mapping = replace_str2num(options.file)
+
 
     if not options.solver in get_env().factory.all_solvers():
         logging.error("Solver %s not available", options.solver)
@@ -96,6 +100,8 @@ def main():
         if options.path:
             result_struct.to_dot(filename)
 
+        replace_num2str(options.file, mapping)
+
     except (ImportError, NotImplementedError, TypeError) as error:
         # create_invocation can raise ImportError
         # Some operators are not implemented.
@@ -107,6 +113,39 @@ def main():
         sys.exit(0)
     else:
         sys.exit(1)
+
+
+
+def replace_str2num(file):
+    with open(file, 'r') as f:
+        content = f.read()
+
+    strings = re.findall(r"'(.*?)'", content)
+    strings = list(set(strings))
+    mapping = {}
+
+    for string in strings:
+        random_number = random.randint(10000, 99999)
+        if random_number in mapping.values():
+            random_number = random.randint(10000, 99999)
+        mapping[string] = random_number
+        content = content.replace(f"'{string}'", str(random_number))
+
+    with open(file, 'w') as f:
+        f.write(content)
+
+    print(mapping)
+    return mapping
+
+def replace_num2str(file, mapping):
+    with open(file, 'r') as f:
+        content = f.read()  
+    for key, value in mapping.items():
+        content = content.replace(str(value), f"'{key}'")
+    with open(file, 'w') as f:
+        f.write(content)
+
+
 
 if __name__ == "__main__":
     main()
