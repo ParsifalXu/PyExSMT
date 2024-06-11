@@ -63,6 +63,48 @@ class Result(object):
         else:
             return ""
 
+    def to_path(self, filename):
+        header = "digraph {\n"
+        footer = "}\n"
+        if self.list_rep is None:
+            self.list_rep = self._to_list_rep(self.path.root_constraint)
+        dot = self._to_path(self.list_rep)
+        dot = header + dot + footer
+        s = Source(dot, filename=filename+".dot", format="png")
+        s.view()
+
+    def _to_path(self, list_rep):
+        curr = self.curr_id
+        if isinstance(list_rep, list) and len(list_rep) == 3:
+            rep = list_rep[0]
+            dot = "\"%s%d\" [ label=\"%s\" ];\n" % (rep, curr, rep)
+            self.curr_id += 1
+
+            for slot in range(1, 3):
+                child = list_rep[slot]
+                if child is None:
+                    continue
+                crep = child[0] if isinstance(child, list) else to_pysmt(child)
+                crep = str(crep).replace('"', '\\\"')
+                dot += "\"%s%d\" -> \"%s%d\" [ label=\"%d\" ];\n" \
+                        %(rep, curr, crep, self.curr_id, slot%2)
+                dot += self._to_path(child)
+            return dot
+        elif list_rep is not None:
+            list_rep = to_pysmt(list_rep)
+            list_rep = str(list_rep).replace('"', '\\\"')
+            temp = "\"%s%d\" [ label=\"%s\" ];\n" % (list_rep, curr, list_rep)
+            self.curr_id += 1
+            return temp
+        else:
+            return ""
+
+
+
+
+
+
+
     def to_summary(self, unknown=Symbol('Unknown', INT)):
         if self.list_rep is None:
             self.list_rep = self._to_list_rep(self.path.root_constraint)
