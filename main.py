@@ -12,9 +12,7 @@ from pysmt.shortcuts import *
 
 def main():
     print("PyExSMT (Python Exploration with SMT)")
-
     sys.path = [os.path.abspath(os.path.join(os.path.dirname(__file__)))] + sys.path
-
     parser = ArgumentParser()
 
     parser.add_argument("--log", dest="loglevel", action="store", \
@@ -37,9 +35,7 @@ def main():
     parser.add_argument("--solver", dest="solver", action="store", \
                                     help="Choose SMT solver", default="z3")
     parser.add_argument(dest="file", action="store", help="Select Python file")
-
     options = parser.parse_args()
-
 
     if options.loglevel in ["info", "INFO", "i", "I"]:
         logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -56,9 +52,7 @@ def main():
     if options.file == "" or not os.path.exists(options.file):
         parser.error("Missing app to execute")
         sys.exit(1)
-    
     mapping = replace_str2num(options.file)
-
 
     if not options.solver in get_env().factory.all_solvers():
         logging.error("Solver %s not available", options.solver)
@@ -67,33 +61,24 @@ def main():
         solver = options.solver
 
     summary = options.summary
-
     filename = os.path.abspath(options.file)
-
-    # Get the object describing the application
     app = loaderFactory(filename, options.entry)
     if app is None:
         sys.exit(1)
 
     print("Exploring " + app.get_file() + "." + app.get_entry())
     funcs = uninterp_func_pair(options.uninterp, app.get_file())
-
     result = None
     try:
         engine = ExplorationEngine(app.create_invocation(), solver=solver)
         result_struct = engine.explore(options.max_iters, options.max_depth, funcs)
-
         return_vals = result_struct.execution_return_values
-
-        # check the result
         result = app.execution_complete(return_vals)
 
-        # print summary
         if summary:
             summary = result_struct.to_summary()
             print("\nSummary:\n%s\n" % summary)
 
-        # output DOT graph
         if options.dot_graph:
             result_struct.to_dot(filename)
 
@@ -103,23 +88,17 @@ def main():
         replace_num2str(options.file, mapping)
 
     except (ImportError, NotImplementedError, TypeError) as error:
-        # create_invocation can raise ImportError
-        # Some operators are not implemented.
-        # Don't need a stack trace for this.
         logging.error(error)
         sys.exit(1)
-
     if result is None or result:
         sys.exit(0)
     else:
         sys.exit(1)
 
 
-
 def replace_str2num(file):
     with open(file, 'r') as f:
         content = f.read()
-
     strings = re.findall(r"'(.*?)'", content)
     strings = list(set(strings))
     mapping = {}
@@ -134,7 +113,6 @@ def replace_str2num(file):
     with open(file, 'w') as f:
         f.write(content)
 
-    print(mapping)
     return mapping
 
 def replace_num2str(file, mapping):
