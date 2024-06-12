@@ -79,8 +79,8 @@ class Result(object):
         self.extract_paths(graph, start_node, [(start_node, None)], paths)
         for path in paths:
             print(" -> ".join(f"{node} ({'True' if condition else 'False'})" for node, condition in path))
-        s = Source(dot, filename=filename+".dot", format="png")
-        s.view()
+        # s = Source(dot, filename=filename+".dot", format="png")
+        # s.view()
     
     def extract_paths(self, graph, node, path, paths):
         successors = graph.successors(node)
