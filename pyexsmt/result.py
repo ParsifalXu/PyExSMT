@@ -1,3 +1,4 @@
+import re
 import logging
 from graphviz import Source
 import pygraphviz as pgv
@@ -78,28 +79,57 @@ class Result(object):
         start_node = list(graph.nodes())[0]
         paths = []
         self.extract_paths(graph, start_node, [(start_node, None)], paths)
-        for path in paths:
-            # print("----------")
-            for node, condition in path:
-                print(f"node: {node}")
-                print(f"condition: {condition}")
-                # node_name = node.get_name()
-                # n = -(len(str(node_indices[node])))
-                # print(f"n: {n}")
-                # print(node_name[:n])
-                
-                # print(f"n: {node_indices[node]}")
-                # print(f"nlen: {type(node_indices[node])}")
-                # print(f"condition: {condition}")
-                
-            # print(" -> ".join(f"{node.get_name()[:-(len(str(node_indices[node])))]} ({'True' if condition else 'False'})" for node, condition in path))
+        for path in paths:                
+            formatted_path = " -> ".join(f"{node.get_name()[:-(len(str(node_indices[node])))]} ({'True' if condition else 'False'})" for node, condition in path)
+            # print(formatted_path)
+            parts = formatted_path.split("->")
+            result = []
+            for part in parts:
+                match = re.match(r"\((.*?)\) \((True|False)\)", part.strip())
+                if match:
+                    result.append((match.group(1), match.group(2)))
+                else:
+                    match = re.match(r"(.*?) \((True|False)\)", part.strip())
+                    if match:
+                        result.append((match.group(1).strip(), match.group(2)))
 
-        
-        
-        s = Source(dot, filename=filename+".dot", format="png")
-        s.view()
+            def adjust(condition, flag):
+                if condition.isnumeric():
+                    return condition
+                flag = flag == 'True'
+                
+                if not flag:
+                    if '!=' in condition:
+                        adjusted_condition = condition.replace('!=', '=')
+                    elif '==' in condition:
+                        adjusted_condition = condition.replace('==', '!=')
+                    elif '<=' in condition:
+                        adjusted_condition = condition.replace('<=', '>')
+                    elif '>=' in condition:
+                        adjusted_condition = condition.replace('>=', '<')
+                    elif '<' in condition:
+                        adjusted_condition = condition.replace('<', '>=')
+                    elif '>' in condition:
+                        adjusted_condition = condition.replace('>', '<=')
+                    else:
+                        adjusted_condition = condition.replace('=', '!=')
+                else:
+                    adjusted_condition = condition
+                
+                return f"({adjusted_condition})"
 
-    # def chang_format(self, path):
+            modified_list = []
+            for i in range(0, len(result)-1):
+                condition = result[i][0]
+                flag = result[i+1][1]
+                modified_list.append(adjust(condition, flag))
+            modified_list.append(result[-1][0])
+
+            print(" -> ".join(modified_list))
+
+        # s = Source(dot, filename=filename+".dot", format="png")
+        # s.view()
+
 
 
     def extract_paths(self, graph, node, path, paths):
