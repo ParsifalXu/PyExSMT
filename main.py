@@ -80,10 +80,10 @@ def main():
             print("\nSummary:\n%s\n" % summary)
 
         if options.dot_graph:
-            result_struct.to_dot(filename)
+            result_struct.to_dot(filename, mapping)
 
         if options.path:
-            result_struct.to_path(filename)
+            result_struct.to_path(filename, mapping)
 
         replace_num2str(options.file, mapping)
 

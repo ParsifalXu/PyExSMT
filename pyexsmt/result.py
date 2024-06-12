@@ -64,13 +64,15 @@ class Result(object):
         else:
             return ""
 
-    def to_path(self, filename):
+    def to_path(self, filename, mapping):
         header = "digraph {\n"
         footer = "}\n"
         if self.list_rep is None:
             self.list_rep = self._to_list_rep(self.path.root_constraint)        
         dot = self._to_path(self.list_rep)
         dot = header + dot + footer
+        for key, value in mapping.items():
+            dot = dot.replace(str(value), f"'{key}'")
         graph = pgv.AGraph(dot)
         start_node = list(graph.nodes())[0]
         paths = []
