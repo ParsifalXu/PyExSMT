@@ -74,14 +74,34 @@ class Result(object):
         for key, value in mapping.items():
             dot = dot.replace(str(value), f"'{key}'")
         graph = pgv.AGraph(dot)
+        node_indices = {node: i for i, node in enumerate(graph.nodes())}
         start_node = list(graph.nodes())[0]
         paths = []
         self.extract_paths(graph, start_node, [(start_node, None)], paths)
         for path in paths:
-            print(" -> ".join(f"{node} ({'True' if condition else 'False'})" for node, condition in path))
-        # s = Source(dot, filename=filename+".dot", format="png")
-        # s.view()
-    
+            # print("----------")
+            for node, condition in path:
+                print(f"node: {node}")
+                print(f"condition: {condition}")
+                # node_name = node.get_name()
+                # n = -(len(str(node_indices[node])))
+                # print(f"n: {n}")
+                # print(node_name[:n])
+                
+                # print(f"n: {node_indices[node]}")
+                # print(f"nlen: {type(node_indices[node])}")
+                # print(f"condition: {condition}")
+                
+            # print(" -> ".join(f"{node.get_name()[:-(len(str(node_indices[node])))]} ({'True' if condition else 'False'})" for node, condition in path))
+
+        
+        
+        s = Source(dot, filename=filename+".dot", format="png")
+        s.view()
+
+    # def chang_format(self, path):
+
+
     def extract_paths(self, graph, node, path, paths):
         successors = graph.successors(node)
         if not successors:
