@@ -1,5 +1,5 @@
 def lib(x,y):
-    if x == 0:
+    if x == 'xxx':
         return 0
     else:
         return x + y
