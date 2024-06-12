@@ -11,7 +11,7 @@ from pyexsmt.explore import ExplorationEngine
 from pysmt.shortcuts import *
 
 def main():
-    print("PyExSMT (Python Exploration with SMT)")
+    # print("PyExSMT (Python Exploration with SMT)")
     sys.path = [os.path.abspath(os.path.join(os.path.dirname(__file__)))] + sys.path
     parser = ArgumentParser()
 
@@ -66,7 +66,7 @@ def main():
     if app is None:
         sys.exit(1)
 
-    print("Exploring " + app.get_file() + "." + app.get_entry())
+    # print("Exploring " + app.get_file() + "." + app.get_entry())
     funcs = uninterp_func_pair(options.uninterp, app.get_file())
     result = None
     try:

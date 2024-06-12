@@ -1,5 +1,6 @@
 import logging
 from graphviz import Source
+import pygraphviz as pgv
 
 from pyexsmt import pred_to_smt, get_concr_value, match_smt_type
 from pyexsmt.symbolic_types import SymbolicObject
@@ -67,11 +68,29 @@ class Result(object):
         header = "digraph {\n"
         footer = "}\n"
         if self.list_rep is None:
-            self.list_rep = self._to_list_rep(self.path.root_constraint)
+            self.list_rep = self._to_list_rep(self.path.root_constraint)        
         dot = self._to_path(self.list_rep)
         dot = header + dot + footer
+        graph = pgv.AGraph(dot)
+        start_node = list(graph.nodes())[0]
+        paths = []
+        self.extract_paths(graph, start_node, [(start_node, None)], paths)
+        for path in paths:
+            print(" -> ".join(f"{node} ({'True' if condition else 'False'})" for node, condition in path))
         s = Source(dot, filename=filename+".dot", format="png")
         s.view()
+    
+    def extract_paths(self, graph, node, path, paths):
+        successors = graph.successors(node)
+        if not successors:
+            paths.append(path)
+            return
+        for successor in successors:
+            edge = graph.get_edge(node, successor)
+            if edge:
+                condition = edge.attr['label'] == '1'
+                new_path = path + [(successor, condition)]
+                self.extract_paths(graph, successor, new_path, paths)
 
     def _to_path(self, list_rep):
         curr = self.curr_id
